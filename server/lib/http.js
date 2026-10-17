@@ -1,0 +1,4 @@
+function securityHeaders(){return {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Permissions-Policy':'camera=(), microphone=(), geolocation=()','Content-Security-Policy':"default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'none'"}}
+function send(res,status,payload,headers={}){Object.entries({...securityHeaders(),...headers}).forEach(([key,value])=>res.setHeader(key,value));res.status(status).json(payload)}
+function readJson(req){if(req.body&&typeof req.body==='object')return req.body;try{return JSON.parse(req.body||'{}')}catch{return {}}}
+module.exports={send,readJson,securityHeaders};

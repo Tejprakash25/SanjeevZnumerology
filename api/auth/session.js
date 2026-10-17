@@ -1,0 +1,2 @@
+const {send}=require('../../server/lib/http');const {readSession}=require('../../server/lib/auth');
+module.exports=(req,res)=>{if(req.method!=='GET')return send(res,405,{error:'Method not allowed'},{Allow:'GET'});try{const session=readSession(req);return session?send(res,200,{authenticated:true}):send(res,401,{error:'Authentication required'})}catch{return send(res,500,{error:'Authentication service unavailable'})}};
