@@ -1,38 +1,27 @@
-# Workbook rule traceability
+# Feature 1 workbook traceability
 
-The six reference workbooks remain local under `reference-workbooks/` and are ignored by Git. The feature engines intentionally do not share calculation tables.
+This checklist covers only Primary Sheldian Analysis. The reference workbooks remain local and ignored by Git.
 
-## Feature 1 — Primary Sheldian Analysis
+| Report section/order | Source workbook and location | Implementation | Test/verification |
+|---|---|---|---|
+| Date characteristics: Personality/Mulank, Destiny/Bhagyank and date qualities | `Numerology Master.xlsx`, `Sheet1`, `A1:B114` | `personality`, `destiny`, `dateQualities` in `server/features/primary.js` | 17/04/2000 regression verifies 8 and 5 |
+| P-D analysis | `Numerology Master.xlsx`, `Sheet1`, `A152:B510` | Server-side P-D section with explicit source-boundary wording where no exact row is selected | Section-order regression |
+| Name characteristics and Paytha values | `Numerology Master.xlsx`, `Sheet1`, `B126:B147` and `B143:J147` | `nameCompound`, `nameRoot`, `letterValues` | Name compound/root regression |
+| Soul characteristics | `Numerology Master.xlsx`, `Sheet1`, `B152:B186` | Vowel-only soul compound/root and source interpretation map | Report-section regression |
+| Lo Shu grid | `Numerology Master.xlsx`, `Sheet1`, `C116:E124` | `gridEntries` and `gridItems`; exact 4-9-2 / 3-5-7 / 8-1-6 order | Exact 17/04/2000 grid regression |
+| Birthday 1–10 rule | `Numerology Master.xlsx`, `Sheet1`, `C116:E124`; explicit task requirement | Mulank included, Bhagyank omitted as an extra entry for days 1–10 | Days 1, 10 and 11 regression |
+| Planes and cross-connections | `Numerology Master.xlsx`, `Sheet1`, `A513:B536` | All eight defined patterns, present and missing interpretations | Definition and missing-pattern regression |
+| Rajyog and Spiritual analysis | `Numerology Master.xlsx`, `Sheet1`, `A525:B536` | Dedicated report sections based on 456 and 357 | Section-order regression |
+| Education and profession | `Numerology Master.xlsx`, `Sheet1`, `A539:B568` | Profession guidance keyed by Destiny number; education boundary retained when no exact pattern exists | Server report inspection |
+| Health references | `Numerology Master.xlsx`, `Sheet1`, `A800:B809` and pattern notes | Non-diagnostic health-reference section | Server report inspection |
+| Friendly numbers and source boundaries for enemy/neutral values | `Numerology Master.xlsx`, `Sheet1`, `A574:F584` | Source-defined friendship map; enemy/neutral are not inferred when absent | Server report inspection |
+| Days and other lucky-reference structure | `Numerology Master.xlsx`, `Sheet1`, `A587:L596`; `Chaitrali Mirashi.xlsx`, `Purchase`, `A32:B40` | Day mapping is source-backed; client-specific colour/direction/deity/fragrance values are not copied | Server report inspection |
+| Event ages/years and personal year | `Numerology Master.xlsx`, `Sheet1`, `A622:B798` | Formula and yearly interpretation sections remain server-side; no client result is fabricated | Section-order regression |
+| Remedies at report end | `Remedy Master.xlsx`, `Sheet1`, number blocks beginning at `A7`, `A27`, `A52`, `A73`, `A94`, `A116`, `A137`, `A154`, `A179` | `remedies` map selected from missing grid numbers; final report section | Remedy placement regression |
 
-| Implementation | Source | Status |
-|---|---|---|
-| DD/MM/YYYY validation and date digit extraction | `Numerology Master.xlsx`, `Sheet1`, `A1:B62` birth-date/qualities table | Implemented |
-| Root-number reduction of the date compound | Same table; the workbook presents compound and root interpretations | Implemented as a clearly named normalization step |
-| A–Z repeating 1–9 name table | `Numerology Master.xlsx`, `Sheet1`, `B143:J147` Paytha Table | Implemented |
-| Pytha grid from birth-date digits | `Numerology Master.xlsx`, `Sheet1`, `B116:D124` Pytha Grid | Implemented |
-| Missing-number remedies | `Remedy Master.xlsx`, `Sheet1`, number blocks beginning at `A7`, `A27`, `A52`, `A73`, `A94`, `A116`, `A137`, `A154` | Implemented for documented 1–8 remedy text |
-| Client-report section order and narrative presentation | `Chaitrali Mirashi.xlsx`, `Purchase`, `A1:P87` | Used for presentation only |
+## Audited ambiguities
 
-Unresolved: the workbook does not define how birth time changes the primary calculations, nor a complete formal “Sheldian” calculation specification. The implementation records the supplied/assumed IST time and does not invent a time-dependent formula.
-
-## Feature 2 — Vedic Numerology Analysis
-
-| Implementation | Source | Status |
-|---|---|---|
-| Excluding the century from the grid input | `Vedik Master.xlsx`, `Sheet1`, `C26:C27` | Implemented |
-| Vedik grid and planet labels | `Vedik Master.xlsx`, `Sheet1`, `F28:H30`, `A7:C25` | Implemented |
-| Hard/soft/neutral groups | `Vedik Master.xlsx`, `Sheet1`, `B55:B61` | Implemented |
-| Known yoga lookup entries | `Vedik Master.xlsx`, `Sheet1`, yoga sections beginning `A64`, `A71`, `A76`, `A81`, `A87`, `A96`, `A100`, `A104` | Implemented only for exact documented sequences |
-| Report presentation | `Rasika Lokolkar.xlsx`, `Purchase`, `A1:P62` | Used for presentation only |
-
-Unresolved: the Vedik workbook does not establish a full time-dependent calculation or a name-number formula. The full name is validated and displayed but is not used to invent an unsupported Vedic score.
-
-## Feature 3 — Mobile Number Recommendation
-
-| Implementation | Source | Status |
-|---|---|---|
-| Pairing interpretation data boundary | `Mobile Number master1.xlsx`, `Sheet1`, `A4:B55` | Source isolated; not mixed into other features |
-| Repeated-number interpretations | `Mobile Number master1.xlsx`, `Sheet1`, `A57:B68` | Source isolated |
-| 10-digit recommendation generation/ranking | No rule present in the workbook | Deliberately blocked; API returns a safe error rather than fabricating candidates |
-
-This is the only approved requirement that cannot be honestly completed from the supplied workbook alone. An operator-approved generation/ranking rule is required before the endpoint can return one primary and two alternatives.
+- The example workbook contains client-specific values for colours, directions, deities, fragrances and some health/event output. Those values are presentation references, not reusable rules, so the generic report names the boundary instead of copying personal results.
+- The primary workbook contains large P-D and event lookup tables with irregular merged layout and incomplete rows. The report does not invent a value when an exact source row cannot be selected from the supplied input.
+- No general enemy/neutral mapping was established in the audited primary source. Only the source-defined friendship table is used.
+- Birth time is recorded and validated in IST, but the audited primary workbook does not define a time-dependent primary formula.
