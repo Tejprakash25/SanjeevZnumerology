@@ -11,7 +11,6 @@ function parseDate(value){
   const raw=bodyString(value,'birthdate',10);
   if(!/^\d{2}\/\d{2}\/\d{4}$/.test(raw))fail('Birthdate must use DD/MM/YYYY');
   const parts=raw.split('/');
-  if(parts.length!==3||parts.some(part=>part.length===0||!/^\d+$/.test(part)))fail('Birthdate must use DD/MM/YYYY');
   const day=Number(parts[0]);
   const month=Number(parts[1]);
   const year=Number(parts[2]);

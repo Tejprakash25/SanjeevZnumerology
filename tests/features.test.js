@@ -9,6 +9,13 @@ const vedic=require('../server/features/vedic');
 const mobile=require('../server/features/mobile');
 const auth=require('../server/lib/auth');
 const primaryApi=require('../api/primary');
+const postApis=[
+  require('../api/auth/login'),
+  require('../api/auth/logout'),
+  primaryApi,
+  require('../api/vedic'),
+  require('../api/mobile')
+];
 
 function mockResponse(){return {statusCode:200,headers:{},body:null,setHeader(key,value){this.headers[key]=value},status(code){this.statusCode=code;return this},json(body){this.body=body;return this}}}
 
@@ -84,7 +91,23 @@ test('session is signed and rejects invalid credentials or cookies',()=>{
   const cookie=auth.sessionCookie(token);
   assert.ok(auth.readSession({headers:{cookie}}));
   assert.equal(auth.readSession({headers:{cookie:'anka_session=invalid'}}),null);
+  assert.equal(auth.readSession({headers:{cookie:'anka_session=%'}}),null);
   assert.throws(()=>auth.login('synthetic-operator','wrong'),/Invalid credentials/);
+});
+test('POST APIs reject cross-origin requests',()=>{
+  for(const handler of postApis){
+    const response=mockResponse();
+    handler({method:'POST',headers:{origin:'https://attacker.example',host:'localhost'},body:{}},response);
+    assert.equal(response.statusCode,403);
+    assert.equal(response.body.error,'Cross-origin request blocked');
+  }
+});
+test('login rejects malformed JSON instead of treating it as empty input',()=>{
+  const loginApi=require('../api/auth/login');
+  const response=mockResponse();
+  loginApi({method:'POST',headers:{host:'localhost'},body:'{invalid}'},response);
+  assert.equal(response.statusCode,400);
+  assert.equal(response.body.error,'Invalid JSON request body');
 });
 test('protected primary API rejects unauthenticated and invalid-session requests',()=>{
   for(const cookie of [undefined,'anka_session=invalid']){

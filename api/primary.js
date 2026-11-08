@@ -1,12 +1,6 @@
-const {readJson,send}=require('../server/lib/http');
+const {isSameOrigin,readJson,send}=require('../server/lib/http');
 const {requireSession}=require('../server/lib/auth');
 const {calculate}=require('../server/features/primary');
-
-function isSameOrigin(req){
-  const origin=req.headers.origin;
-  if(!origin)return true;
-  try{return new URL(origin).host===req.headers.host}catch{return false}
-}
 
 module.exports=(req,res)=>{
   if(req.method!=='POST')return send(res,405,{error:'Method not allowed'},{Allow:'POST'});
