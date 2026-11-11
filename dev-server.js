@@ -8,4 +8,21 @@ const handlers={'/api/auth/login':require('./api/auth/login'),'/api/auth/logout'
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
 function invoke(handler,req,res,body){const response={statusCode:200,headers:{},setHeader(key,value){this.headers[key]=value},status(code){this.statusCode=code;return this},json(payload){for(const [key,value] of Object.entries(this.headers))res.setHeader(key,value);res.statusCode=this.statusCode;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(payload));return this}};req.body=body;handler(req,response)}
 const server=http.createServer((req,res)=>{const url=new URL(req.url,`http://${req.headers.host}`);const handler=handlers[url.pathname];if(handler){let body='';req.on('data',chunk=>{body+=chunk});req.on('end',()=>invoke(handler,req,res,body));return}const requested=url.pathname==='/'?'/index.html':url.pathname;const file=path.resolve(root,'.'+requested);const relative=path.relative(root,file);if(relative==='..'||relative.startsWith(`..${path.sep}`)||path.isAbsolute(relative)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.statusCode=404;res.end('Not found');return}res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res)});
-const port=Number(process.env.PORT||3000);server.listen(port,'127.0.0.1',()=>console.log(`ANKA local server: http://127.0.0.1:${port}`));
+function listen(port,remainingFallbacks=10){
+  const onError=error=>{
+    server.removeListener('error',onError);
+    if(error.code==='EADDRINUSE'&&remainingFallbacks>0){
+      console.warn(`Port ${port} is already in use; trying ${port+1}.`);
+      listen(port+1,remainingFallbacks-1);
+      return;
+    }
+    console.error(`Unable to start ANKA local server on port ${port}: ${error.message}`);
+    process.exitCode=1;
+  };
+  server.once('error',onError);
+  server.listen(port,'127.0.0.1',()=>{
+    server.removeListener('error',onError);
+    console.log(`ANKA local server: http://127.0.0.1:${port}`);
+  });
+}
+listen(Number(process.env.PORT||3000));

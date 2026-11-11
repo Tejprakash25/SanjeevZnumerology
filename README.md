@@ -34,7 +34,7 @@ For local work without a Vercel login, use the included dependency-free launcher
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000`. Do not open `index.html` directly as `file://`; that bypasses the API boundary and causes the browser CORS error you will see from `/api/auth/session`.
+Open the URL printed by the server (normally `http://127.0.0.1:3000`). If that port is already in use, the launcher tries the next ten ports and prints the first available URL. You can set a starting port with `PORT=4000 npm run dev`. Do not open `index.html` directly as `file://`; that bypasses the API boundary and causes the browser CORS error you will see from `/api/auth/session`.
 
 For Vercel parity, `vercel dev` can also be used after authenticating the Vercel CLI.
 

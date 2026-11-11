@@ -29,8 +29,9 @@ function toneForRating(rating){
 function reverseDigits(value){return [...String(value)].reverse().join('')}
 function gridEntries(birth){
   const raw=digits(`${String(birth.day).padStart(2,'0')}${String(birth.month).padStart(2,'0')}${birth.year}`).filter(Boolean);
-  const p=personality(birth); const d=destiny(birth);
-  const values=birth.day<=10?[...raw,p]:[...raw,p,d];
+  const p=personality(birth);
+  const d=destiny(birth);
+  const values=birth.day>=10?[...raw,p,d]:[...raw,d];
   const counts=Array.from({length:10},()=>0); values.forEach(value=>{if(value>=1&&value<=9)counts[value]++});
   return counts;
 }
@@ -64,7 +65,10 @@ function calculate(input){
   const relationship=source.relationships[String(p)]||{};
   const favorable=source.favorable[String(p)]||{};
   const pDInterpretation=source.pdInterpretations[`${p}=${d}`];
-  const remedyItems=missing.flatMap(number=>(source.remedies[String(number)]||[]).map((value,index)=>({label:`Missing number ${number}${index?' option '+(index+1):''}`,value,tone:'positive'})));
+  const remedyItems=missing.map(number=>({
+    label:`Missing number ${number}`,
+    remedies:source.remedies[String(number)]||[]
+  })).filter(item=>item.remedies.length);
   const pythaLines=[
     {orientation:'Vertical',numbers:[3,2,1]},
     {orientation:'Vertical',numbers:[6,5,4]},
@@ -94,7 +98,7 @@ function calculate(input){
       {label:'Vowel characteristics',value:[...new Set([...fullName.toUpperCase()].filter(char=>'AEIOU'.includes(char)))].join(', ')||'none'}
     ]),
     section('Soul characteristics','rows',[{label:`Soul compound / root ${sc} → ${sr}`,value:source.soulQualities[String(sr)]||'No source interpretation available.'}]),
-    section('Lo Shu grid','grid',gridItems(counts),`Layout: 4 | 9 | 2 / 3 | 5 | 7 / 8 | 1 | 6. Present: ${present.join(', ')||'none'}. Missing: ${missing.join(', ')||'none'}. Birthday 1–10 rule: Mulank included; Bhagyank is not added as an extra grid entry.`),
+    section('Lo Shu grid','grid',gridItems(counts),`Layout: 4 | 9 | 2 / 3 | 5 | 7 / 8 | 1 | 6. Present: ${present.join(', ')||'none'}. Missing: ${missing.join(', ')||'none'}. Grid entries include the complete birth-date digits and Destiny ${d}${birth.day>=10?`; Personality ${p} is also included for this birthday`:`; Personality ${p} is not added for birthdays 1–9`}. Soul number is never included.`),
     section('Paytha grid','grid',pythaGridItems(counts),'Workbook layout: 3 | 6 | 9 / 2 | 5 | 8 / 1 | 4 | 7.'),
     section('Paytha pattern analysis','rows',[
       {label:'Completed vertical lines',value:linesFor('Vertical').join(', ')||'None',tone:linesFor('Vertical').length?'positive':'negative'},
@@ -144,7 +148,7 @@ function calculate(input){
       ...(source.personalYearRemedies[String(personalYearNumber)]?[{label:'Workbook suggestion',value:source.personalYearRemedies[String(personalYearNumber)],tone:'positive'}]:[])
     ]),
     section('Suggestions','rows',[{label:'Source boundary',value:'Use the workbook-derived remedy section below; no additional conventional numerology rules are invented.'}]),
-    section('Remedies','remedies',remedyItems,`Options for missing numbers; the Remedy Master advises focusing on one or two relevant numbers rather than all options. Friendly numbers already present in the grid do not need remedies.`)
+    section('Remedies','remedies',remedyItems,'Only numbers missing from this birth-date grid are shown. The Remedy Master advises focusing on one or two relevant numbers rather than applying every remedy.')
   ];
   return {feature:'primary',featureLabel:'Primary Sheldian Analysis',sourceWorkbook,report:{subjectName:fullName,birthDate:birth.raw,birthTimeLabel:`${birthTime} IST${timeAssumed?' (assumed)':''}`,numberSummary:{personality:p,destiny:d,transformation,soul:sr},sections,sourceBoundaries:{primary:sourceWorkbook,remedies:remedyWorkbook}}};
 }

@@ -96,8 +96,8 @@ For birthdate **17/04/2000**:
 - Personality/Mulank: 1 + 7 = **8**
 - Destiny/Bhagyank: 1 + 7 + 0 + 4 + 2 + 0 + 0 + 0 = 14, reduced to **5**
 - Do not enter zero into the grid.
-- Apply the source workbook’s digit-frequency rules to the birthdate digits, Personality/Mulank, and Destiny/Bhagyank.
-- Expected grid:
+- Apply the source workbook’s digit-frequency rules to the complete birthdate digits and Destiny/Bhagyank for every birthday. Add Personality/Mulank only for birthdays on or after day 10. Never include the Soul number.
+- Expected grid (Personality 8 and Destiny 5 are both added for the 17th birthday):
 
 ```text
 4 | _ | 2
@@ -107,9 +107,9 @@ _ | 5 | 7
 
 This exact expected grid is a required regression test. If workbook rules appear to conflict with this explicitly required result, document the conflict instead of silently changing the expected result.
 
-### Birthday 1–10 special rule
+### Destiny inclusion and Personality cutoff
 
-For birthdays from day **1 through day 10 inclusive**, include the Personality/Mulank number, but do **not** add Destiny/Bhagyank as an additional grid entry. Implement this boundary rule exactly and test at least days 1, 10, and 11. Confirm how the rule interacts with repeated digits using the workbooks.
+Include the complete birthdate digits and Destiny/Bhagyank in the grid for every birthday. Add Personality/Mulank only for birthdays on or after the **10th**; birthdays on days **1–9** do not get an additional Personality entry. Never include the Soul number. For example, a birthdate on the 7th includes the date digit 7 once, without an extra Personality 7; a birthdate on the 13th includes its date digits, Destiny, and adds Personality 4 (1+3). For **03/02/1971**, include date digit 3 once and Destiny 5; do not add Personality 3 a second time. Implement this exactly and test days 1, 3, 7, 9, 10, 11, and 13. Confirm how the rule interacts with repeated digits using the workbooks.
 
 ## 6. Planes, cross-connections, and number patterns
 
@@ -173,7 +173,7 @@ Create or update automated tests for all critical Feature 1 logic. At minimum, c
 
 1. The exact Lo Shu grid for 17/04/2000.
 2. Personality/Mulank and Destiny/Bhagyank calculations.
-3. The birthday 1–10 special rule, including days 1, 10, and 11.
+3. Include Destiny for all birthdays; add Personality only for birthdays 10+; test days 1, 3, 7, 9, 10, 11, and 13; verify Soul is never included.
 4. Zero handling and repeated-digit frequency according to the workbook.
 5. Each defined plane and cross-connection, including absent/missing numbers.
 6. All report sections and their order against the workbook-derived checklist.
